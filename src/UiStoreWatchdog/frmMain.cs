@@ -10,6 +10,9 @@ namespace UiStoreWatchdog
         public frmMain()
         {
             InitializeComponent();
+            Icon = Properties.Resources.m_red;
+            notifyIcon1.Icon = Properties.Resources.m_red;
+
             timer1.Interval = Convert.ToInt32(numericUpDown1.Value * 1000);
 
             Resize += FrmMain_Resize;
@@ -51,15 +54,11 @@ namespace UiStoreWatchdog
         private void rbOffline_CheckedChanged(object sender, EventArgs e)
         {
             timer1.Stop();
-            Icon = Properties.Resources.m_red;
-            notifyIcon1.Icon = Properties.Resources.m_red;
         }
 
         private void rbOnline_CheckedChanged(object sender, EventArgs e)
         {
             timer1.Start();
-            Icon = Properties.Resources.m_green;
-            notifyIcon1.Icon = Properties.Resources.m_green;
         }
 
         private async void timer1_Tick(object sender, EventArgs e)
@@ -67,6 +66,8 @@ namespace UiStoreWatchdog
             try
             {
                 timer1.Stop();
+
+                bool anythingInStock = false;
 
                 foreach (ItemWithStatus item in Items)
                 {
@@ -79,10 +80,17 @@ namespace UiStoreWatchdog
                     {
                         item.Status = "In stock!";
 
-                        string itemName = string.IsNullOrWhiteSpace(item.Name) ? "Something" : item.Name;
-                        notifyIcon1.BalloonTipTitle = $"{itemName} is in stock!";
-                        notifyIcon1.BalloonTipText = $"Your item is now in stock!";
-                        notifyIcon1.ShowBalloonTip(3000);
+                        if (item.NotificationsActive)
+                        {
+                            anythingInStock = true;
+                            Icon = Properties.Resources.m_green;
+                            notifyIcon1.Icon = Properties.Resources.m_green;
+
+                            string itemName = string.IsNullOrWhiteSpace(item.Name) ? "Something" : item.Name;
+                            notifyIcon1.BalloonTipTitle = $"{itemName} is in stock!";
+                            notifyIcon1.BalloonTipText = $"Your item is now in stock!";
+                            notifyIcon1.ShowBalloonTip(3000);
+                        }
                     }
                     else
                     {
@@ -91,12 +99,21 @@ namespace UiStoreWatchdog
 
                 }
 
+                if (!anythingInStock)
+                {
+                    Icon = Properties.Resources.m_red;
+                    notifyIcon1.Icon = Properties.Resources.m_red;
+                }
+
                 dataGridView1.Refresh();
                 timer1.Start();
             }
             catch (Exception ex)
             {
+                MessageBox.Show(ex.ToString(), "Error");
                 timer1.Stop();
+                rbOffline.Checked = true;
+                rbOnline.Checked = false;
             }
         }
 
@@ -137,16 +154,23 @@ namespace UiStoreWatchdog
         private void LoadList()
         {
             string path = Application.UserAppDataPath + "\\watchlist.json";
-            string json = File.ReadAllText(path);
-
-            List<Item>? data = System.Text.Json.JsonSerializer.Deserialize<List<Item>>(json);
-            if (data == null)
+            if (File.Exists(path))
             {
-                MessageBox.Show($"Could not load list from {path}", "Error", MessageBoxButtons.OK);
-                data = new();
-            }
+                string json = File.ReadAllText(path);
 
-            Items = new BindingList<ItemWithStatus>(data.Select(x => new ItemWithStatus(x)).ToList());
+                List<Item>? data = System.Text.Json.JsonSerializer.Deserialize<List<Item>>(json);
+                if (data == null)
+                {
+                    MessageBox.Show($"Could not load list from {path}", "Error", MessageBoxButtons.OK);
+                    data = new();
+                }
+
+                Items = new BindingList<ItemWithStatus>(data.Select(x => new ItemWithStatus(x)).ToList());
+            }
+            else
+            {
+                Items = new();
+            }
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)

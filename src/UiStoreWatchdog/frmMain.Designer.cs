@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.rbOnline = new System.Windows.Forms.RadioButton();
@@ -43,7 +42,6 @@
             // 
             // notifyIcon1
             // 
-            this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
             this.notifyIcon1.Text = "Ubiquiti Store Watchdog";
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.Click += new System.EventHandler(this.notifyIcon1_Click);
@@ -102,6 +100,16 @@
             // numericUpDown1
             // 
             this.numericUpDown1.Location = new System.Drawing.Point(274, 11);
+            this.numericUpDown1.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+            this.numericUpDown1.Minimum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
             this.numericUpDown1.Name = "numericUpDown1";
             this.numericUpDown1.Size = new System.Drawing.Size(120, 23);
             this.numericUpDown1.TabIndex = 5;
@@ -122,7 +130,6 @@
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.rbOffline);
             this.Controls.Add(this.rbOnline);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "frmMain";
             this.Text = "Ubiquity Shop Watchdog";
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
